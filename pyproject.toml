@@ -2,6 +2,7 @@
 name = "dotenvy"
 version = "0.1.0"
 dependencies = ["click", "cryptography"]
+author = "Swapnil"
 
 [project.scripts]
 dotenvy = "dotenvy.cli:cli"
