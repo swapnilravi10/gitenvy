@@ -1,3 +1,12 @@
 Metadata-Version: 2.4
 Name: dotenvy
-Version: 0.0.0
+Version: 0.1.0
+Summary: A library to manage encrypted .env files with Git as a single source of truth
+Home-page: https://github.com/swapnilravi10/dotenvy
+Author: Swapnil Sawant
+License: MIT
+Keywords: dotenv,encryption,git,secrets
+Requires-Dist: click>=8.1
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: cryptography>=41.0
+Requires-Dist: gitpython>=3.1
