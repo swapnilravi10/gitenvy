@@ -1,0 +1,16 @@
+certifi==2025.8.3
+cffi==1.17.1
+charset-normalizer==3.4.3
+click==8.2.1
+colorama==0.4.6
+cryptography==45.0.6
+gitdb==4.0.12
+GitPython==3.1.45
+idna==3.10
+Naked==0.1.32
+pycparser==2.22
+PyYAML==6.0.2
+requests==2.32.5
+shellescape==3.8.1
+smmap==5.0.2
+urllib3==2.5.0

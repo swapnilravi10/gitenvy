@@ -7,4 +7,6 @@ __pycache__/
 *.py[cod]
 
 # Ignore specific dotenvy cache file
-dotenvy/__pycache__/cli.cpython-313.pyc
+dotenvy/__pycache__/*
+
+dotenvy.egg-info/*

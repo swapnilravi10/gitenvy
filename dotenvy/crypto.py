@@ -25,5 +25,7 @@ class CryptoManager:
     def encrypt(self, content: str) -> bytes:
         return self.fernet.encrypt(content.encode())
     
-    def decrypt(self, token: bytes) -> str:
+    def decrypt(self, file_path) -> str:
+        with open(file_path, "rb") as f: 
+            token = f.read()
         return self.fernet.decrypt(token).decode()
