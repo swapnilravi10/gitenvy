@@ -9,9 +9,10 @@ def cli():
 @cli.command()
 @click.option('--project', required=True, help='Project name')
 @click.option('--env','--env-name', required=True, help='Environment name (e.g., dev, prod)')
-def push(project, env):
+@click.option("--repo-path", default=r"C:\Users\swapn\Documents\work\test", help="Local git repo path to store encrypted envs")
+def push(project, env, repo_path):
     """Push and encrypt the .env file for a specific project and environment."""
-    manager = EnvManager(project, env)
+    manager = EnvManager(project, env, repo_path=repo_path)
     try:
         out_file = manager.push()
         click.echo(f"Encrypted .env file stored at: {out_file}")

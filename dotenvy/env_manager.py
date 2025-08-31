@@ -4,13 +4,17 @@ from git import Repo, GitCommandError
 from .crypto import CryptoManager
 
 class EnvManager:
-    def __init__(self, project: str, env_name: str, repo_path: str = "dotenvy-store"):
+    def __init__(self, project: str, env_name: str, repo_path: str = None):
         """
         repo_path: path to your local clone of the private repo
         """
         self.project = project
         self.env_name = env_name
         self.crypto = CryptoManager()
+
+        if repo_path is None:
+            # set a default if needed
+            repo_path = r"C:\Users\swapn\Documents\work\test"  # your local store repo
         self.repo_path = repo_path
 
         # open the repo

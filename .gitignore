@@ -1,3 +1,10 @@
-./dotenvy.egg-info
+# Ignore IDE and environment files
 ./.vscode
 .env
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore specific dotenvy cache file
+dotenvy/__pycache__/cli.cpython-313.pyc
