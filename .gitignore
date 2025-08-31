@@ -8,5 +8,3 @@ __pycache__/
 
 # Ignore specific dotenvy cache file
 dotenvy/__pycache__/*
-
-dotenvy.egg-info/*
