@@ -1,0 +1,2 @@
+[console_scripts]
+dotenvy = dotenvy.cli:cli
