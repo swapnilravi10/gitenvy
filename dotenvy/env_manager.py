@@ -22,8 +22,8 @@ class EnvManager:
         self.repo_path = cfg.get("repo_path")
         if not self.repo_path:
             raise RuntimeError("dotenvy not initialized. Run `dotenvy init --repo <URL>` first.")
-        if repo_path:
-            self.repo_path = repo_path
+        
+        self.repo = repo_path
 
     def push(self, env_file: str = ".env"):
         """Encrypt and push the .env file to the git repo"""
