@@ -4,7 +4,6 @@ charset-normalizer==3.4.3
 click==8.2.1
 colorama==0.4.6
 cryptography==45.0.6
--e git+https://github.com/swapnilravi10/dotenvy.git@f5ad6ee5417e4dfaff56e783a3b119aa99fa5240#egg=dotenvy
 gitdb==4.0.12
 GitPython==3.1.45
 idna==3.10

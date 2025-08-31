@@ -1,11 +1,10 @@
 pyproject.toml
 dotenvy/__init__.py
 dotenvy/cli.py
+dotenvy/config_manager.py
 dotenvy/crypto.py
 dotenvy/env_manager.py
 dotenvy.egg-info/PKG-INFO
 dotenvy.egg-info/SOURCES.txt
 dotenvy.egg-info/dependency_links.txt
-dotenvy.egg-info/entry_points.txt
-dotenvy.egg-info/requires.txt
 dotenvy.egg-info/top_level.txt
