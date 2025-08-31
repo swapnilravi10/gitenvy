@@ -1,0 +1,7 @@
+[project]
+name = "dotenvy"
+version = "0.1.0"
+dependencies = ["click", "cryptography"]
+
+[project.scripts]
+dotenvy = "dotenvy.cli:cli"
