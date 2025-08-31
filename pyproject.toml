@@ -1,7 +1,7 @@
 [project]
 name = "dotenvy"
 version = "0.1.0"
-dependencies = ["click", "cryptography"]
+dependencies = ["click", "cryptography", "GitPython"]
 author = "Swapnil"
 
 [project.scripts]
