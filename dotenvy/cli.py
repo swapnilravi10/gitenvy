@@ -5,6 +5,8 @@ import subprocess
 import os
 import json
 
+DEFAULT_REPO_PATH = os.path.expanduser("~/.dotenvy/envs")
+
 @click.group()
 def cli():
     """dotenvy - manage environment variables securely."""
@@ -12,7 +14,7 @@ def cli():
 
 @cli.command()
 @click.option("--repo", required=True, help="Git repo URL for storing envs")
-@click.option("--path", default="~/.dotenvy/envs", help="Local path to clone the repo")
+@click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
 def init(repo, path):
     """Initialize dotenvy by cloning the env repo and saving config."""
     path = os.path.expanduser(path)
@@ -27,13 +29,17 @@ def init(repo, path):
         subprocess.run(["git", "clone", repo, path], check=True)
         click.echo("Repo cloned successfully")
     else:
-        click.echo("Repo path already exists, pulling latest changes...")
-        subprocess.run(["git", "-C", path, "pull"], check=True)
+        git_dir = os.path.join(path, ".git")
+        if os.path.exists(git_dir):
+            click.echo("Repo path exists, pulling latest changes...")
+            subprocess.run(["git", "-C", path, "pull"], check=True)
+        else:
+            click.echo("Warning: path exists but is not a git repo.")
 
 @cli.command()
 @click.option('--project', required=True, help='Project name')
 @click.option('--env','--env-name', required=True, help='Environment name (e.g., dev, prod)')
-@click.option("--repo-path", default=r"C:\Users\swapn\Documents\work\test", help="Local git repo path to store encrypted envs")
+@click.option("--repo-path", default=DEFAULT_REPO_PATH, help="Local git repo path to store encrypted envs")
 def push(project, env, repo_path):
     """Push and encrypt the .env file for a specific project and environment."""
     manager = EnvManager(project, env, repo_path=repo_path)
@@ -45,11 +51,11 @@ def push(project, env, repo_path):
 
 @cli.command()
 @click.option("--project", required=True)
-@click.option("--env", "env_name", required=True)
-@click.option("--repo-path", default=r"C:\Users\swapn\Documents\work\test")
-def list(project, env_name, repo_path):
+@click.option("--env", "--env-name", required=True)
+@click.option("--repo-path", default=DEFAULT_REPO_PATH)
+def list(project, env, repo_path):
     """List all versions of a project/env"""
-    base_dir = os.path.join(repo_path, project, env_name)
+    base_dir = os.path.join(repo_path, project, env)
     if not os.path.exists(base_dir):
         click.echo("No versions found")
         return
@@ -66,15 +72,18 @@ def list(project, env_name, repo_path):
 
 @cli.command()
 @click.option("--project", required=True)
-@click.option("--env", "env_name", required=True)
+@click.option("--env", "--env-name", required=True)
 @click.option("--version", default="latest", help="Version to pull")
 @click.option("--out-path", default=".env", help="Where to save decrypted .env")
-@click.option("--repo-path", default=r"C:\Users\swapn\Documents\work\test")
-def pull(project, env_name, version, out_path, repo_path):
+@click.option("--repo-path", default=DEFAULT_REPO_PATH)
+def pull(project, env, version, out_path, repo_path):
     """Pull a version of .env from git and decrypt it locally"""
-    manager = EnvManager(project, env_name, repo_path=repo_path)
-    file_path = manager.pull(version=version, out_path=out_path)
-    click.echo(f"✅ Decrypted .env saved to {file_path}")
+    manager = EnvManager(project, env, repo_path=repo_path)
+    try:
+        file_path = manager.pull(version=version, out_path=out_path)
+        click.echo(f"✅ Decrypted .env saved to {file_path}")
+    except (FileNotFoundError, ValueError) as e:
+        click.echo(f"⚠️ {str(e)}")
 
 if __name__ == "__main__":
     cli() 
