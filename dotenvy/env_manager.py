@@ -27,10 +27,12 @@ class EnvManager:
             self.repo = Repo(self.repo_path)
         except GitCommandError as e:
             raise RuntimeError(f"Failed to initialize git repo at {self.repo_path}: {e}")
+        self.git_user_name = getpass.getuser()  # fallback
         try:
             self.git_user_name = self.repo.config_reader().get_value("user", "name")
-        except GitConfigParserError:
-            git_user_name = getpass.getuser()
+        except (KeyError, IOError):
+            # fallback to system username if git config not set
+            pass
 
     def push(self, env_file: str = ".env"):
         """Encrypt and push the .env file to the git repo"""
