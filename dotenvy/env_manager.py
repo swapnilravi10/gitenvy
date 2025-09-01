@@ -42,10 +42,10 @@ class EnvManager:
 
         encrypted = self.crypto.encrypt(env_file_path.read_text())
 
-        base_dir = self.repo_path / self.project / self.env_name
+        base_dir = Path(self.repo_path) / self.project / self.env_name
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        existing_versions = [int(name) for name in base_dir.iterdir() if name.name.isdigit()]
+        existing_versions = [int(p.name) for p in base_dir.iterdir() if p.name.isdigit()]
         next_version = str(max(existing_versions, default=0) + 1)
 
         out_dir = base_dir / next_version
