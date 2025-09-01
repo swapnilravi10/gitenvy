@@ -5,7 +5,6 @@ from .config_manager import ConfigManager
 import getpass
 from datetime import datetime
 import json
-from git.exc import GitConfigParserError
 
 class EnvManager:
     def __init__(self, project: str, env_name: str, repo_path: str = None):
