@@ -1,3 +1,23 @@
+[tool.poetry]
+name = "dotenvy"
+version = "0.1.0"
+description = "A library to manage encrypted .env files with Git as a single source of truth"
+authors = ["Swapnil Sawant <swapnil.ravi10@gmail.com>"]
+license = "MIT"
+homepage = "https://github.com/swapnilravi10/dotenvy"
+repository = "https://github.com/swapnilravi10/dotenvy"
+keywords = ["dotenv", "encryption", "git", "secrets"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+click = "^8.1"
+pyyaml = "^6.0"
+cryptography = "^41.0"
+gitpython = "^3.1"
+
+[tool.poetry.scripts]
+dotenvy = "dotenvy.cli:cli"
+
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.5.0"]
+build-backend = "poetry.core.masonry.api"
