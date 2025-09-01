@@ -5,6 +5,7 @@ from .config_manager import ConfigManager
 import getpass
 from datetime import datetime
 import json
+from git.exc import NoOptionError, NoSectionError
 
 class EnvManager:
     def __init__(self, project: str, env_name: str, repo_path: str = None):
@@ -26,7 +27,11 @@ class EnvManager:
             self.repo = Repo(self.repo_path)
         except GitCommandError as e:
             raise RuntimeError(f"Failed to initialize git repo at {self.repo_path}: {e}")
-        self.git_user_name = self.repo.config_reader().get_value("user", "name", fallback=getpass.getuser())
+        try:
+            self.git_user_name = self.repo.config_reader().get_value("user", "name")
+        except (NoOptionError, NoSectionError):
+            import getpass
+            self.git_user_name = getpass.getuser()
 
     def push(self, env_file: str = ".env"):
         """Encrypt and push the .env file to the git repo"""
