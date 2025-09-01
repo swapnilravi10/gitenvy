@@ -73,3 +73,6 @@ This project is licensed under the [MIT License](./LICENSE).
 
 Contributions, issues, and feature requests are welcome!  
 Feel free to check out the [issues page](https://github.com/swapnilravi10/dotenvy/issues) to get started.
+Before contributing, please read our [Code of Conduct](CODE_OF_CONDUCT.md).  
+
+Thank you for helping improve Dotenvy! 💜
