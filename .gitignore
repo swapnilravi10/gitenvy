@@ -5,3 +5,8 @@
 dist/
 build/
 *.egg-info/
+*/__pycache__/
+.idea/
+.envrc
+/tmp_repo/
+/.pytest_cache/

@@ -6,7 +6,7 @@ KEY_FILE = CONFIG_DIR / "key"
 
 class CryptoManager:
     def __init__(self, key_path: Path = None):
-        self.key_path = key_path or DEFAULT_KEY_FILE
+        self.key_path = key_path or KEY_FILE
         self.key = self._get_or_create_key()
         self.fernet = Fernet(self.key)
     
