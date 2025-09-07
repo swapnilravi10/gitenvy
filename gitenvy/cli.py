@@ -1,22 +1,22 @@
 import click
-from dotenvy.env_manager import EnvManager
-from dotenvy.config_manager import ConfigManager
+from gitenvy.env_manager import EnvManager
+from gitenvy.config_manager import ConfigManager
 import subprocess
 import os
 import json
 
-DEFAULT_REPO_PATH = os.path.expanduser("~/.dotenvy/envs")
+DEFAULT_REPO_PATH = os.path.expanduser("~/.gitenvy/envs")
 
 @click.group()
 def cli():
-    """dotenvy - manage environment variables securely."""
+    """gitenvy - manage environment variables securely."""
     pass
 
 @cli.command()
 @click.option("--repo", required=True, help="Git repo URL for storing envs")
 @click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
 def init(repo, path):
-    """Initialize dotenvy by cloning the env repo and saving config."""
+    """Initialize gitenvy by cloning the env repo and saving config."""
     path = os.path.expanduser(path)
     cm = ConfigManager()
 

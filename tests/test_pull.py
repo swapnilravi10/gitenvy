@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 import json
-from dotenvy.env_manager import EnvManager
+from gitenvy.env_manager import EnvManager
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def mock_repo(tmp_path, monkeypatch):
         def encrypt(self, content): return content.encode()
         def decrypt(self, file_path): return "SECRET=123"
 
-    monkeypatch.setattr("dotenvy.env_manager.CryptoManager", lambda: DummyCrypto())
+    monkeypatch.setattr("gitenvy.env_manager.CryptoManager", lambda: DummyCrypto())
 
     enc_file = base_dir / ".env.enc"
     enc_file.write_bytes(b"encrypted-data")
@@ -31,7 +31,7 @@ def mock_repo(tmp_path, monkeypatch):
         def config_reader(self): return self
         def get_value(self, *_args, **_kwargs): return "Test User"
 
-    monkeypatch.setattr("dotenvy.env_manager.Repo", DummyRepo)
+    monkeypatch.setattr("gitenvy.env_manager.Repo", DummyRepo)
 
     return project, env, repo_path
 
