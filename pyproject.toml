@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "dotenvy"
+name = "gitenvy"
 version = "0.1.0"
 description = "A library to manage encrypted .env files with Git as a single source of truth"
 authors = ["Swapnil Sawant <swapnil.ravi10@gmail.com>"]
 license = "MIT"
-homepage = "https://github.com/swapnilravi10/dotenvy"
-repository = "https://github.com/swapnilravi10/dotenvy"
-keywords = ["dotenv", "encryption", "git", "secrets"]
+homepage = "https://github.com/swapnilravi10/gitenvy"
+repository = "https://github.com/swapnilravi10/gitenvy"
+keywords = ["gitenv", "encryption", "git", "secrets", "gitenvy"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
@@ -16,7 +16,7 @@ cryptography = "^41.0"
 gitpython = "^3.1"
 
 [tool.poetry.scripts]
-dotenvy = "dotenvy.cli:cli"
+gitenvy = "gitenvy.cli:cli"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]

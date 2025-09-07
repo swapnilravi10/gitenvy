@@ -1,8 +1,8 @@
-# dotenvy
+# gitenvy
 
 🔐 **Manage encrypted `.env` files with Git as the single source of truth.**
 
-`dotenvy` helps teams and individuals securely version-control their environment files.  
+`gitenvy` helps teams and individuals securely version-control their environment files.  
 It encrypts `.env` files before committing them, so sensitive secrets never appear in plaintext inside Git.  
 
 ---
@@ -22,30 +22,30 @@ It encrypts `.env` files before committing them, so sensitive secrets never appe
 Install via pip directly from GitHub:
 
 ```bash
-pip install git+https://github.com/swapnilravi10/dotenvy.git
+pip install git+https://github.com/swapnilravi10/gitenvy.git
 ```
-(Coming soon to PyPI: pip install dotenvy)
+(Coming soon to PyPI: pip install gitenvy)
 
 ## 🚀 Quick Start
-1. Initialize dotenvy with your storage repo
+1. Initialize gitenvy with your storage repo
 ```bash
-dotenvy init --repo git@github.com:your-org/dotenvy-envs.git
+gitenvy init --repo git@github.com:your-org/your-storage-repo.git
 ```
 2. Push a .env file securely
 ```bash
-dotenvy push --project sales --env prod
+gitenvy push --project sales --env prod
 ```
 3. Pull and decrypt a version
 ```bash
-dotenvy pull --project sales --env prod --version latest --out .env
+gitenvy pull --project sales --env prod --version latest --out .env
 ```
 4. List available versions
 ```bash
-dotenvy list --project sales --env prod
+gitenvy list --project sales --env prod
 ```
 ## 🔑 Encryption Key Management
 
-- On first use, dotenvy generates a Fernet key and stores it locally (~/.dotenvy/key).
+- On first use, gitenvy generates a Fernet key and stores it locally (~/.gitenvy/key).
 
 - To collaborate, share the key with your team securely (1Password, Vault, etc).
 
@@ -55,13 +55,13 @@ dotenvy list --project sales --env prod
 
 Clone the repo:
 ```bash
-git clone https://github.com/swapnilravi10/dotenvy.git
-cd dotenvy
+git clone https://github.com/swapnilravi10/gitenvy.git
+cd gitenvy
 poetry install
 ```
 Run the CLI locally:
 ```bash
-poetry run dotenvy --help
+poetry run gitenvy --help
 ```
 ## 📜 License
 
@@ -72,7 +72,7 @@ This project is licensed under the [MIT License](./LICENSE).
 ## 🙌 Contributing
 
 Contributions, issues, and feature requests are welcome!  
-Feel free to check out the [issues page](https://github.com/swapnilravi10/dotenvy/issues) to get started.
+Feel free to check out the [issues page](https://github.com/swapnilravi10/gitenvy/issues) to get started.
 Before contributing, please read our [Code of Conduct](CODE_OF_CONDUCT.md).  
 
-Thank you for helping improve Dotenvy! 💜
+Thank you for helping improve Gitenvy! 💜

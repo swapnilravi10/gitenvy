@@ -1,4 +1,4 @@
-# Contributing to Dotenvy
+# Contributing to gitenvy
 
 First off, thank you for considering contributing! 🙌  
 We appreciate all kinds of contributions: bug fixes, improvements, documentation, and new features.
@@ -11,13 +11,13 @@ Click the "Fork" button on the top-right of the repository page to create your o
 ### 2. Clone Your Fork
 If you prefer SSH:
 ```bash
-git clone git@github.com:swapnilravi10/dotenvy.git
-cd dotenvy
+git clone git@github.com:swapnilravi10/gitenvy.git
+cd gitenvy
 ```
 Or if you prefer HTTPS:
 ```bash
-git clone https://github.com/swapnilravi10/dotenvy.git
-cd dotenvy
+git clone https://github.com/swapnilravi10/gitenvy.git
+cd gitenvy
 ```
 
 ### 3. Install Dependencies
@@ -59,7 +59,7 @@ Then create a Pull Request on GitHub, describing your changes.
 
 If you find a bug or have a feature request:
 
-1. Check the [issues](https://github.com/swapnilravi10/dotenvy/issues) page to see if it already exists.
+1. Check the [issues](https://github.com/swapnilravi10/gitenvy/issues) page to see if it already exists.
 2. Open a new issue with a clear description and steps to reproduce (if applicable).
 
 ## Code of Conduct
@@ -68,4 +68,4 @@ Please be respectful and follow the [Code of Conduct](CODE_OF_CONDUCT.md) when c
 
 ---
 
-Thank you for helping improve **Dotenvy**! 💜
+Thank you for helping improve **gitenvy**! 💜

@@ -20,7 +20,7 @@ class EnvManager:
 
         self.repo_path = Path(repo_path) if repo_path else Path(cfg.get("repo_path", ""))
         if not self.repo_path.exists():
-            raise RuntimeError("dotenvy not initialized. Run `dotenvy init --repo <URL>` first.")
+            raise RuntimeError("gitenvy not initialized. Run `gitenvy init --repo <URL>` first.")
 
         try:
             self.repo = Repo(self.repo_path)

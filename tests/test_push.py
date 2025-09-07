@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import pytest
 
-from dotenvy.env_manager import EnvManager
+from gitenvy.env_manager import EnvManager
 
 
 class DummyCrypto:
@@ -50,11 +50,11 @@ def temp_repo(tmp_path, monkeypatch):
     env_file.write_text("SECRET=123")
 
     # Patch CryptoManager and Repo
-    monkeypatch.setattr("dotenvy.env_manager.CryptoManager", lambda: DummyCrypto())
-    monkeypatch.setattr("dotenvy.env_manager.Repo", lambda path: DummyRepo(path))
+    monkeypatch.setattr("gitenvy.env_manager.CryptoManager", lambda: DummyCrypto())
+    monkeypatch.setattr("gitenvy.env_manager.Repo", lambda path: DummyRepo(path))
 
     # Patch ConfigManager.load to avoid needing a config file
-    monkeypatch.setattr("dotenvy.env_manager.ConfigManager", lambda: type("CM", (), {"load": lambda self: {"repo_path": str(tmp_path)}})())
+    monkeypatch.setattr("gitenvy.env_manager.ConfigManager", lambda: type("CM", (), {"load": lambda self: {"repo_path": str(tmp_path)}})())
 
     return tmp_path
 

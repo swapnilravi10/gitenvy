@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 
 class ConfigManager:
     def __init__(self, config_path: Optional[Path] = None):
-        self.config_file = config_path or Path.home() / ".dotenvy" / "config.yml"
+        self.config_file = config_path or Path.home() / ".gitenvy" / "config.yml"
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         self._config: Dict[str, Any] = {}
 
