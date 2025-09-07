@@ -1,7 +1,7 @@
 from pathlib import Path
 from cryptography.fernet import Fernet
 
-CONFIG_DIR = Path.home() / ".dotenvy"
+CONFIG_DIR = Path.home() / ".gitenvy"
 KEY_FILE = CONFIG_DIR / "key"
 
 class CryptoManager:
