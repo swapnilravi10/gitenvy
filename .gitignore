@@ -2,9 +2,9 @@
 *.pyc
 .env
 .venv/
-dist/
-build/
-*.egg-info/
+/dist/
+/build/
+/*.egg-info/
 */__pycache__/
 .idea/
 .envrc
