@@ -10,3 +10,4 @@ build/
 .envrc
 /tmp_repo/
 /.pytest_cache/
+playground.py
