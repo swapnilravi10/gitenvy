@@ -43,6 +43,46 @@ gitenvy pull --project sales --env prod --version latest --out .env
 ```bash
 gitenvy list --project sales --env prod
 ```
+## 📝 Usage
+
+### Initialize gitenvy
+
+```bash
+gitenvy init --repo git@github.com:your-org/your-storage-repo.git
+```
+Clones the repo and sets up your config.
+
+---
+
+### Push a .env file
+
+```bash
+gitenvy push --project <PROJECT> --env <ENV>
+```
+Encrypts and pushes the `.env` file in your current directory to the specified project/environment.
+
+---
+
+### Pull and decrypt a .env file
+
+```bash
+gitenvy pull --project <PROJECT> --env <ENV> --version latest --out-path .env
+```
+Downloads and decrypts the latest (or specified) version of the `.env` file.
+
+---
+
+### List projects, environments, or versions
+
+```bash
+gitenvy list
+gitenvy list --project <PROJECT>
+gitenvy list --project <PROJECT> --env <ENV>
+```
+- `gitenvy list` — Lists all projects.
+- `gitenvy list --project <PROJECT>` — Lists all environments for a project.
+- `gitenvy list --project <PROJECT> --env <ENV>` — Lists all versions for an environment.
+
 ## 🔑 Encryption Key Management
 
 - On first use, gitenvy generates a Fernet key and stores it locally (~/.gitenvy/key).
