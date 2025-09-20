@@ -5,6 +5,7 @@ from .config_manager import ConfigManager
 import getpass
 from datetime import datetime
 import json
+import os
 
 class EnvManager:
     def __init__(self, project: str, env_name: str, repo_path: str = None):
@@ -94,3 +95,68 @@ class EnvManager:
         out_file.write_text(decrypted_data)
 
         return out_file
+    
+    def list_projects(self):
+        """List all projects in the repo"""
+        if not self.repo_path.exists():
+            return []
+        return [project.name for project in self.repo_path.iterdir() if project.is_dir() and project.name != ".git"]
+    
+    def list_envs(self, project: str):
+        """List all environments for a given project"""
+        project_dir = self.repo_path / project
+        if not project_dir.exists():
+            return []
+        return [env.name for env in project_dir.iterdir() if env.is_dir()]
+
+    def list_versions(self, version: str = None):
+        """List all versions for the current project/env, or details of a specific version if provided"""
+        base_dir = os.path.join(self.repo_path, self.project, self.env_name)
+        if not os.path.exists(base_dir):
+            return []
+        if version:
+            if version.lower() == "latest":
+                versions = sorted([v for v in os.listdir(base_dir) if v.isdigit()])
+                if not versions:
+                    return []
+                version = versions[-1]
+
+            version_dir = os.path.join(base_dir, version)
+            if not os.path.exists(version_dir):
+                return []
+            meta_file = os.path.join(version_dir, "metadata.json")
+            if os.path.exists(meta_file):
+                with open(meta_file) as f:
+                    meta = json.load(f)
+                return [{
+                    "version": version,
+                    "last_updated_by": meta.get("last_updated_by", "unknown"),
+                    "last_updated_at": meta.get("last_updated_at", "unknown"),
+                }]
+            else:
+                return [{
+                    "version": version,
+                    "last_updated_by": None,
+                    "last_updated_at": None,
+                }]
+        versions = sorted([v for v in os.listdir(base_dir) if v.isdigit()])
+        results = []
+
+        for v in versions:
+            meta_file = os.path.join(base_dir, v, "metadata.json")
+            if os.path.exists(meta_file):
+                with open(meta_file) as f:
+                    meta = json.load(f)
+                results.append({
+                    "version": v,
+                    "last_updated_by": meta.get("last_updated_by", "unknown"),
+                    "last_updated_at": meta.get("last_updated_at", "unknown"),
+                })
+            else:
+                results.append({
+                    "version": v,
+                    "last_updated_by": None,
+                    "last_updated_at": None,
+                })
+
+        return results
