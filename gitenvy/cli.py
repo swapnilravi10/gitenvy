@@ -1,11 +1,14 @@
 import click
 from gitenvy.env_manager import EnvManager
 from gitenvy.config_manager import ConfigManager
+from gitenvy.utils.config_finder import ConfigFinder
 import subprocess
 import os
 import json
 
-DEFAULT_REPO_PATH = os.path.expanduser("~/.gitenvy/envs")
+DEFAULT_REPO_PATH = os.path.expanduser("~/.gitenvy/repos")
+DEFAULT_CONFIG_REPO_PATH = ConfigFinder().get_default_repo_path()
+DEFAULT_CONFIG = ConfigFinder().get_default_config()
 
 @click.group()
 def cli():
@@ -17,11 +20,13 @@ def cli():
 @click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
 def init(repo, path):
     """Initialize gitenvy by cloning the env repo and saving config."""
-    path = os.path.expanduser(path)
+
+    config_name = repo.split("/")[-1].replace(".git", "")
+    path = os.path.expanduser(os.path.join(path, config_name))
     cm = ConfigManager()
 
     # Save config
-    cm.save({"repo_url": repo, "repo_path": path})
+    cm.save({"repo_url": repo, "repo_path": path, "config_name": config_name})
     click.echo(f"Config saved: {repo} -> {path}")
 
     # Clone repo if not exists
@@ -39,7 +44,7 @@ def init(repo, path):
 @cli.command()
 @click.option('--project', required=True, help='Project name')
 @click.option('--env','--env-name', required=True, help='Environment name (e.g., dev, prod)')
-@click.option("--repo-path", default=DEFAULT_REPO_PATH, help="Local git repo path to store encrypted envs")
+@click.option("--repo-path", default=DEFAULT_CONFIG_REPO_PATH, help="Local git repo path to store encrypted envs")
 def push(project, env, repo_path):
     """
     Push .env file for a specific project and environment. \n

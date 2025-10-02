@@ -1,12 +1,14 @@
 import yaml
 from pathlib import Path
 from typing import Any, Dict, Optional
+from gitenvy.utils.config_builder import ConfigBuilder
 
 class ConfigManager:
     def __init__(self, config_path: Optional[Path] = None):
         self.config_file = config_path or Path.home() / ".gitenvy" / "config.yml"
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         self._config: Dict[str, Any] = {}
+        self.config_builder = ConfigBuilder()
 
     def load(self) -> Dict[str, Any]:
         if not self.config_file.exists():
@@ -20,6 +22,11 @@ class ConfigManager:
         return self._config
     
     def save(self, config: Dict[str, Any]):
+        config = self.config_builder.create_update_yaml_config(
+            repo_url=config.get("repo_url", ""),
+            repo_path=config.get("repo_path", ""),
+            config_name=config.get("config_name", "")
+        )
         with open(self.config_file, "w") as f:
             yaml.dump(config, f)
         self._config = config
