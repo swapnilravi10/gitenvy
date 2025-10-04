@@ -2,6 +2,7 @@ import click
 from gitenvy.env_manager import EnvManager
 from gitenvy.config_manager import ConfigManager
 from gitenvy.utils.config_finder import ConfigFinder
+from gitenvy.utils.config_builder import ConfigBuilder
 import subprocess
 import os
 import json
@@ -18,28 +19,31 @@ def cli():
 @cli.command()
 @click.option("--repo", required=True, help="Git repo URL for storing envs")
 @click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
-def init(repo, path):
+@click.option("--branch", default=None, help="Branch to clone or checkout after cloning")
+def init(repo, path, branch):
     """Initialize gitenvy by cloning the env repo and saving config."""
 
-    config_name = repo.split("/")[-1].replace(".git", "")
+    config_builder = ConfigBuilder()
+    config_name = config_builder.extract_repo_name(repo)
     path = os.path.expanduser(os.path.join(path, config_name))
-    cm = ConfigManager()
 
-    # Save config
-    cm.save({"repo_url": repo, "repo_path": path, "config_name": config_name})
-    click.echo(f"Config saved: {repo} -> {path}")
+    # Clone or pull the repo first
+    result_msg = EnvManager.init_repo(repo, path, branch)
+    click.echo(result_msg)
 
-    # Clone repo if not exists
-    if not os.path.exists(path):
-        subprocess.run(["git", "clone", repo, path], check=True)
-        click.echo("Repo cloned successfully")
+    # If successful, save config
+    if result_msg.startswith("✅"):
+        cm = ConfigManager()
+        cm.save({
+            "repo_url": repo,
+            "repo_path": path,
+            "config_name": config_name,
+            "branch": branch
+        })
+        click.echo(f"Config saved: {repo} -> {path}")
     else:
-        git_dir = os.path.join(path, ".git")
-        if os.path.exists(git_dir):
-            click.echo("Repo path exists, pulling latest changes...")
-            subprocess.run(["git", "-C", path, "pull"], check=True)
-        else:
-            click.echo("Warning: path exists but is not a git repo.")
+        click.echo("Config not saved due to repo error.")
+
 
 @cli.command()
 @click.option('--project', required=True, help='Project name')

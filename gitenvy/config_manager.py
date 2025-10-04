@@ -25,7 +25,8 @@ class ConfigManager:
         config = self.config_builder.create_update_yaml_config(
             repo_url=config.get("repo_url", ""),
             repo_path=config.get("repo_path", ""),
-            config_name=config.get("config_name", "")
+            config_name=config.get("config_name", ""),
+            branch=config.get("branch", None)
         )
         with open(self.config_file, "w") as f:
             yaml.dump(config, f)
