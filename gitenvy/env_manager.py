@@ -43,6 +43,7 @@ class EnvManager:
     def init_repo(repo_url, path, branch=None):
         """
         Clone the repo if not exists, or pull and switch branch if exists.
+        Returns: dict with 'success' (bool) and 'message' (str)
         """
         git_dir = os.path.join(path, ".git")
         if not os.path.exists(path):
@@ -52,9 +53,15 @@ class EnvManager:
             clone_cmd += [repo_url, path]
             try:
                 subprocess.run(clone_cmd, check=True)
-                return f"✅ Repo cloned successfully{' on branch ' + branch if branch else ''}"
+                return {
+                    "success": True,
+                    "message": f"✅ Repo cloned successfully{' on branch ' + branch if branch else ''}"
+                }
             except subprocess.CalledProcessError as e:
-                return f"⚠️ Git clone failed: {e}"
+                return {
+                    "success": False,
+                    "message": f"⚠️ Git clone failed: {e}"
+                }
         else:
             if os.path.exists(git_dir):
                 try:
@@ -66,11 +73,20 @@ class EnvManager:
                         else:
                             repo_obj.git.checkout("-b", branch, f"origin/{branch}")
                     repo_obj.git.pull()
-                    return f"✅ Repo updated{' on branch ' + branch if branch else ''}"
+                    return {
+                        "success": True,
+                        "message": f"✅ Repo updated{' on branch ' + branch if branch else ''}"
+                    }
                 except Exception as e:
-                    return f"⚠️ Git operation failed: {e}"
+                    return {
+                        "success": False,
+                        "message": f"⚠️ Git operation failed: {e}"
+                    }
             else:
-                return "⚠️ Path exists but is not a git repo."
+                return {
+                    "success": False,
+                    "message": "⚠️ Path exists but is not a git repo."
+                }
 
     def push(self, env_file: str = ".env"):
         """Encrypt and push the .env file to the git repo"""

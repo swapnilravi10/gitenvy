@@ -3,9 +3,7 @@ from gitenvy.env_manager import EnvManager
 from gitenvy.config_manager import ConfigManager
 from gitenvy.utils.config_finder import ConfigFinder
 from gitenvy.utils.config_builder import ConfigBuilder
-import subprocess
 import os
-import json
 
 DEFAULT_REPO_PATH = os.path.expanduser("~/.gitenvy/repos")
 DEFAULT_CONFIG_REPO_PATH = ConfigFinder().get_default_repo_path()
@@ -28,11 +26,10 @@ def init(repo, path, branch):
     path = os.path.expanduser(os.path.join(path, config_name))
 
     # Clone or pull the repo first
-    result_msg = EnvManager.init_repo(repo, path, branch)
-    click.echo(result_msg)
+    result = EnvManager.init_repo(repo, path, branch)
+    click.echo(result["message"])
 
-    # If successful, save config
-    if result_msg.startswith("✅"):
+    if result["success"]:
         cm = ConfigManager()
         cm.save({
             "repo_url": repo,
@@ -48,14 +45,24 @@ def init(repo, path, branch):
 @cli.command()
 @click.option('--project', required=True, help='Project name')
 @click.option('--env','--env-name', required=True, help='Environment name (e.g., dev, prod)')
-@click.option("--repo-path", default=DEFAULT_CONFIG_REPO_PATH, help="Local git repo path to store encrypted envs")
-def push(project, env, repo_path):
+@click.option("--repo-name", required=False, help="Name of the repo as in config")
+def push(project, env, repo_name):
     """
-    Push .env file for a specific project and environment. \n
-    Usage: \n
-        gitenvy push --project <PROJECT> --env <ENV> 
-            Encrypts and pushes the .env file in the current directory to the specified project and environment.
+    Push .env file for a specific project and environment.
     """
+    cm = ConfigManager()
+    config = cm.load()
+    
+    if repo_name:
+        repo_cfg = config['configs'].get(repo_name)
+        if not repo_cfg:
+            click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+            return
+        repo_path = repo_cfg['repo_path']
+    else:
+        default_name = config.get('default')
+        repo_cfg = config['configs'][default_name]
+        repo_path = repo_cfg['repo_path']
     manager = EnvManager(project, env, repo_path=repo_path)
     try:
         out_file = manager.push()
@@ -153,4 +160,4 @@ def pull(project, env, version, out_path, repo_path):
         click.echo(f"⚠️ {str(e)}")
 
 if __name__ == "__main__":
-    cli() 
+    cli()
