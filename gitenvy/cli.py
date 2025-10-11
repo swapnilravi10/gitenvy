@@ -18,7 +18,19 @@ def cli():
 @click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
 @click.option("--branch", default=None, help="Branch to clone or checkout after cloning")
 def init(repo, path, branch):
-    """Initialize gitenvy by cloning the env repo and saving config."""
+    """
+    Initialize gitenvy by cloning the env repo and saving config. \n
+
+    Usage: \n
+        - gitenvy init <repo_url> \n
+        Initialize git repo.
+
+        - gitenvy init <repo_url> --path <local_path> \n
+        Initialize git repo at specified local path.
+
+        - gitenvy init <repo_url> --branch <branch_name> \n
+        Initialize git repo and checkout specified branch.
+    """
 
     config_builder = ConfigBuilder()
     config_name = config_builder.extract_repo_name(repo)
@@ -47,9 +59,10 @@ def init(repo, path, branch):
 def push(project, env, repo_name):
     """
     Push .env file for a specific project and environment. \n
+    
     Usage: \n
         - gitenvy push --project <PROJECT> --env <ENV> \n
-        Encrypts and pushes the .env file to the specified project and environment.
+        Encrypts and pushes the .env file to the specified project and environment. Uses default repo.
 
         - gitenvy push --project <PROJECT> --env <ENV> --repo-name <REPO_NAME> \n
         Same as above, but specifies which repo config to use if multiple are configured.
@@ -77,10 +90,21 @@ def push(project, env, repo_name):
 @click.option("--env", "--env-name", required=False, help="Environment name")
 def list_config(repo_name, project, env):
     """
-    List all repo names in your config in a tabular format, marking the default.
-    If --repo-name is provided, list all projects in that repo.
-    If --repo-name and --project are provided, list all envs in that project.
-    If --repo-name, --project and --env-name are provided, list all versions in that env.
+    List all repo names in your config, marking the default.
+
+    Usage: \n
+        - gitenvy list \n
+        Lists all configured repos. Marks the default repo.
+
+        - gitenvy list --repo-name <REPO_NAME> \n
+        Lists all projects in the specified repo.
+
+        - gitenvy list --repo-name <REPO_NAME> --project <PROJECT> \n
+        Lists all environments in the specified project of the specified repo.
+
+        - gitenvy list --repo-name <REPO_NAME> --project <PROJECT> --env <ENV> \n
+        Lists all versions in the specified environment of the specified project and repo. 
+        Shows last updated by and timestamp.
     """
     cm = ConfigManager()
     config = cm.load()
@@ -118,7 +142,21 @@ def list_config(repo_name, project, env):
 @click.option("--repo-name", required=False, help="Name of the repo as in config")
 def pull(project, env, version, out_path, repo_name):
     """
-    Pull .env from git or a specific project and environment.
+    Pull .env for a specific project and environment. \n
+
+    Usage: \n
+        - gitenvy pull --project <PROJECT> --env <ENV> \n
+        Decrypts and saves the latest version of the .env file for the specified project and environment. Uses default repo.
+
+        - gitenvy pull --project <PROJECT> --env <ENV> --version <VERSION> \n
+        Same as above, but pulls the specified version instead of the latest.
+
+        - gitenvy pull --project <PROJECT> --env <ENV> --out-path <PATH> \n
+        Same as above, but saves the decrypted .env file to the specified path. 
+        Out-path can be absolute or relative. Defaults to './.env'. 
+
+        - gitenvy pull --project <PROJECT> --env <ENV> --repo-name <REPO_NAME> \n
+        Same as above, but specifies which repo config to use if multiple are configured.
     """
     cm = ConfigManager()
     config = cm.load()
@@ -139,6 +177,13 @@ def pull(project, env, version, out_path, repo_name):
 @cli.command(name="set-default")
 @click.argument("repo_name")
 def set_default(repo_name):
+    """
+    Set the default repo to use when none is specified. \n
+
+    Usage: \n
+        - gitenvy set-default <REPO_NAME> \n
+        Sets the specified repo as the default in your config.
+    """
     cm = ConfigManager()
     config = cm.load()
     if repo_name not in config.get("configs", {}):
@@ -153,6 +198,12 @@ def set_default(repo_name):
 @cli.command(name="get-key")
 @click.argument("repo_name")
 def get_key(repo_name):
+    """
+    Get the Fernet key for a specific repo. \n
+    Usage: \n
+        - gitenvy get-key <REPO_NAME> \n
+        Retrieves and displays the Fernet key for the specified repo.
+    """
     cm = ConfigManager()
     config = cm.load()
     repo_cfg = config['configs'].get(repo_name)
@@ -174,6 +225,12 @@ def get_key(repo_name):
 @click.argument("repo_name")
 @click.argument("key")
 def set_key(repo_name, key):
+    """
+    Set the Fernet key for a specific repo. \n
+    Usage: \n
+        - gitenvy set-key <REPO_NAME> <KEY> \n
+        Sets the Fernet key for the specified repo.
+    """
     cm = ConfigManager()
     config = cm.load()
     repo_cfg = config['configs'].get(repo_name)

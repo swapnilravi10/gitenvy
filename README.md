@@ -1,107 +1,202 @@
-# gitenvy
+# 🧰 gitenvy
 
-🔐 **Manage encrypted `.env` files with Git as the single source of truth.**
-
-`gitenvy` helps teams and individuals securely version-control their environment files.  
-It encrypts `.env` files before committing them, so sensitive secrets never appear in plaintext inside Git.  
+Securely store, version, and share your `.env` files using Git repositories — with built-in encryption and version tracking.
 
 ---
 
 ## ✨ Features
 
-- 🔒 **Secure by default** — uses [Fernet encryption](https://cryptography.io/en/latest/fernet/)  
-- 📂 **Git-backed storage** — treat your Git repo as the source of truth for `.env` versions  
-- 📈 **Versioned environments** — each push creates a new version for rollback and audit  
-- 👥 **Team-ready** — share encrypted `.env` files with teammates  
-- 💻 **Simple CLI** — intuitive commands for `init`, `push`, `pull`, and `list`  
+- 🔐 AES (Fernet) encryption for `.env` files  
+- 🕓 Versioning — every push creates a new version  
+- 🧩 Multi-repo support — manage multiple environments or teams easily  
+- 🌿 Branch-aware cloning and pushing  
+- ⚙️ Simple YAML-based config  
+- 🪄 Fully CLI-driven workflow  
 
 ---
 
 ## 📦 Installation
 
-Install via pip directly from GitHub:
-
 ```bash
-pip install git+https://github.com/swapnilravi10/gitenvy.git
+pip install gitenvy
 ```
-(Coming soon to PyPI: pip install gitenvy)
-
-## 🚀 Quick Start
-1. Initialize gitenvy with your storage repo
-```bash
-gitenvy init --repo git@github.com:your-org/your-storage-repo.git
-```
-2. Push a .env file securely
-```bash
-gitenvy push --project sales --env prod
-```
-3. Pull and decrypt a version
-```bash
-gitenvy pull --project sales --env prod --version latest --out .env
-```
-4. List available versions
-```bash
-gitenvy list --project sales --env prod
-```
-## 📝 Usage
-
-### Initialize gitenvy
-
-```bash
-gitenvy init --repo git@github.com:your-org/your-storage-repo.git
-```
-Clones the repo and sets up your config.
 
 ---
 
-### Push a .env file
+## ⚙️ Configuration
+
+Configuration is stored in:
+
+```
+~/.gitenvy/config.yml
+```
+
+Example:
+
+```yaml
+configs:
+  dotenvy-store:
+    branch: feature-test-checkout
+    key_path: ~/.gitenvy/keys/dotenvy-store.key
+    repo_path: C:\Users\swapn/.gitenvy/repos\dotenvy-store
+    repo_url: https://github.com/swapnilravi10/dotenvy-store
+default: dotenvy-store
+```
+
+Each `config` entry represents one git-backed store for `.env` files.  
+You can manage multiple repositories and set one as default.
+You do not manually create the config, instead use the init command.
+
+---
+
+## 🧩 Usage
+
+### 🏁 Initialize gitenvy
+
+Initialize and configure your environment store.
+
+```bash
+gitenvy init <repo_url>
+```
+
+#### Examples
+
+```bash
+# Clone and initialize repo
+gitenvy init git@github.com:your-org/env-storage.git
+
+# Clone to a custom local path
+gitenvy init git@github.com:your-org/env-storage.git --path ~/.gitenvy/repos/custom-repo
+
+# Clone and checkout a specific branch
+gitenvy init git@github.com:your-org/env-storage.git --branch feature/config-refactor
+```
+
+🗂️ This automatically saves the repo info in your config file.
+
+---
+
+### 🚀 Push a .env file
+
+Push a local `.env` file to your encrypted environment store.
 
 ```bash
 gitenvy push --project <PROJECT> --env <ENV>
 ```
-Encrypts and pushes the `.env` file in your current directory to the specified project/environment.
 
----
-
-### Pull and decrypt a .env file
+#### Examples
 
 ```bash
-gitenvy pull --project <PROJECT> --env <ENV> --version latest --out-path .env
+# Push using the default repo config
+gitenvy push --project myapp --env dev
+
+# Push using a specific repo config
+gitenvy push --project myapp --env prod --repo-name dotenvy-store
 ```
-Downloads and decrypts the latest (or specified) version of the `.env` file.
+
+Each push creates a new version under:
+```
+<repo>/<project>/<env>/<version>/
+```
 
 ---
 
-### List projects, environments, or versions
+### 📥 Pull and decrypt a .env file
+
+Retrieve and decrypt an environment file from the repo.
+
+```bash
+gitenvy pull --project <PROJECT> --env <ENV> [--version <VERSION>] [--out-path <PATH>] [--repo-name <REPO_NAME>]
+```
+
+#### Examples
+
+```bash
+# Pull latest .env for a project
+gitenvy pull --project myapp --env dev
+
+# Pull a specific version
+gitenvy pull --project myapp --env dev --version 3
+
+# Pull and save to a custom path
+gitenvy pull --project myapp --env dev --out-path ./envs/.env.dev
+
+# Pull from a specific repo config
+gitenvy pull --project myapp --env staging --repo-name dotenvy-store
+```
+
+---
+
+### 📋 List projects, environments, or versions
+
+List what’s stored in your encrypted repo.
 
 ```bash
 gitenvy list
 gitenvy list --project <PROJECT>
 gitenvy list --project <PROJECT> --env <ENV>
 ```
-- `gitenvy list` — Lists all projects.
-- `gitenvy list --project <PROJECT>` — Lists all environments for a project.
+
+- `gitenvy list` — Lists all projects.  
+- `gitenvy list --project <PROJECT>` — Lists all environments for a project.  
 - `gitenvy list --project <PROJECT> --env <ENV>` — Lists all versions for an environment.
 
-## 🔑 Encryption Key Management
+---
 
-- On first use, gitenvy generates a Fernet key and stores it locally (~/.gitenvy/key).
+### ⚙️ Manage config defaults and keys
 
-- To collaborate, share the key with your team securely (1Password, Vault, etc).
-
-- Everyone using the same key can encrypt/decrypt .env files.
-
-## 🛠 Development
-
-Clone the repo:
+#### Set the default repo
 ```bash
-git clone https://github.com/swapnilravi10/gitenvy.git
-cd gitenvy
-poetry install
+gitenvy set-default <REPO_NAME>
 ```
-Run the CLI locally:
+Sets which repo is used when no `--repo-name` is specified.
+
+#### Get the Fernet key for a repo
 ```bash
-poetry run gitenvy --help
+gitenvy get-key <REPO_NAME>
+```
+
+#### Set the Fernet key for a repo
+```bash
+gitenvy set-key <REPO_NAME> <KEY>
+```
+
+---
+
+## 🔄 Example Multi-Repo Workflow
+
+You can maintain multiple repo configs and easily switch between them:
+
+```bash
+# Initialize two repos
+gitenvy init git@github.com:org1/env-store.git
+gitenvy init git@github.com:org2/env-store.git --branch secure-configs
+
+# Push to a specific repo
+gitenvy push --project webapp --env staging --repo-name org2-env-store
+
+# Set default repo
+gitenvy set-default org1-env-store
+```
+
+---
+
+## 🧠 Notes
+
+- Supports both **HTTPS** and **SSH** Git URLs seamlessly.
+- `.env` files are encrypted before every commit.
+- Each repo stores its own encryption key at `~/.gitenvy/keys/<repo>.key`.
+
+---
+
+## 🛠️ Tech Stack
+
+- Python 3.9+
+- [Click](https://click.palletsprojects.com/) for CLI
+- [GitPython](https://gitpython.readthedocs.io/) for Git operations
+- [cryptography](https://cryptography.io/) for encryption
+
+---
 ```
 ## 📜 License
 
