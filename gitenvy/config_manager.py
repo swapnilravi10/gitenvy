@@ -31,6 +31,13 @@ class ConfigManager:
         with open(self.config_file, "w") as f:
             yaml.dump(config, f)
         self._config = config
+    
+    def set_default(self, repo_name: str):
+        if not self._config:
+            self.load()
+        self._config["default"] = repo_name
+        with open(self.config_file, "w") as f:
+            yaml.dump(self._config, f)
 
     def get(self, key, default: Any = None) -> Any:
         if not self._config:

@@ -9,7 +9,7 @@ import os
 import subprocess
 
 class EnvManager:
-    def __init__(self, project: str, env_name: str, repo_path: str = None):
+    def __init__(self, project: str, env_name: str, repo_name:str):
         """
         repo_path: path to your local clone of the private repo
         """
@@ -18,12 +18,15 @@ class EnvManager:
 
         self.project = project
         self.env_name = env_name
-        self.crypto = CryptoManager()
 
         cm = ConfigManager()
         cfg = cm.load()
 
-        repo_path = repo_path or cfg.get("repo_path", "")
+        repo_key_path = cfg.get("configs", {}).get(repo_name, {}).get("key_path")
+        self.repo_key_path = Path(os.path.expanduser(repo_key_path))
+        self.crypto = CryptoManager(self.repo_key_path)
+
+        repo_path = cfg.get("configs", {}).get(repo_name, {}).get("repo_path")
         self.repo_path = Path(os.path.expanduser(repo_path))
         if not self.repo_path.exists():
             raise FileNotFoundError( f"Repo path does not exist: {self.repo_path}. "

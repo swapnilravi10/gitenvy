@@ -1,12 +1,10 @@
 from pathlib import Path
 from cryptography.fernet import Fernet
 
-CONFIG_DIR = Path.home() / ".gitenvy"
-KEY_FILE = CONFIG_DIR / "key"
 
 class CryptoManager:
-    def __init__(self, key_path: Path = None):
-        self.key_path = key_path or KEY_FILE
+    def __init__(self, key_path: Path):
+        self.key_path = key_path
         self.key = self._get_or_create_key()
         self.fernet = Fernet(self.key)
     

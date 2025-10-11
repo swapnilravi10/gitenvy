@@ -1,13 +1,12 @@
 import click
 from gitenvy.env_manager import EnvManager
 from gitenvy.config_manager import ConfigManager
-from gitenvy.utils.config_finder import ConfigFinder
 from gitenvy.utils.config_builder import ConfigBuilder
 import os
+from pathlib import Path
+from gitenvy.utils.helper import *
 
 DEFAULT_REPO_PATH = os.path.expanduser("~/.gitenvy/repos")
-DEFAULT_CONFIG_REPO_PATH = ConfigFinder().get_default_repo_path()
-DEFAULT_CONFIG = ConfigFinder().get_default_config()
 
 @click.group()
 def cli():
@@ -15,7 +14,7 @@ def cli():
     pass
 
 @cli.command()
-@click.option("--repo", required=True, help="Git repo URL for storing envs")
+@click.argument("repo")
 @click.option("--path", default=DEFAULT_REPO_PATH, help="Local path to clone the repo")
 @click.option("--branch", default=None, help="Branch to clone or checkout after cloning")
 def init(repo, path, branch):
@@ -58,82 +57,52 @@ def push(project, env, repo_name):
         if not repo_cfg:
             click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
             return
-        repo_path = repo_cfg['repo_path']
     else:
         default_name = config.get('default')
-        repo_cfg = config['configs'][default_name]
-        repo_path = repo_cfg['repo_path']
-    manager = EnvManager(project, env, repo_path=repo_path)
+    manager = EnvManager(project, env, repo_name=repo_name or default_name)
     try:
         out_file = manager.push()
         click.echo(f"Encrypted .env file stored at: {out_file}")
     except FileNotFoundError as e:
         click.echo(str(e))
 
-@cli.command()
+@cli.command(name="list")
+@click.option("--repo-name", required=False, help="Name of the repo as in config")
 @click.option("--project", required=False, help="Project name")
 @click.option("--env", "--env-name", required=False, help="Environment name")
-@click.option("--v","--version", required=False, help="Version")
-@click.option("--repo-path", default=DEFAULT_REPO_PATH)
-def list(project, env, repo_path):
+def list_config(repo_name, project, env):
     """
-    List projects, envs, or versions. \n
-    Usage: \n
-        gitenvy list 
-            List all projects.
-
-        gitenvy list --project <PROJECT>
-            List all environments under the specified project.
-
-        gitenvy list --project <PROJECT> --env <ENV>
-            List all versions for the specified environment in the project.
-
-        gitenvy list --project <PROJECT> --env <ENV> --version
-            List details of all versions
-
-        gitenvy list --project <PROJECT> --env <ENV> --version <VERSION>
-            List details of specific version (e.g., 1)
-
-        gitenvy list --project <PROJECT> --env <ENV> --version latest
-            List details of latest version (e.g., latest)
-
-    Returns:
-        Prints a list of projects, environments, or version metadata depending on the options provided.
+    List all repo names in your config in a tabular format, marking the default.
+    If --repo-name is provided, list all projects in that repo.
+    If --repo-name and --project are provided, list all envs in that project.
+    If --repo-name, --project and --env-name are provided, list all versions in that env.
     """
-    manager = EnvManager(project or  "", env or "", repo_path=repo_path)
-    try:
-        if not project and not env:
-            projects = manager.list_projects()
-            if not projects:
-                click.echo("⚠️ No projects found")
-                return
-            else:
-                click.echo("📁 Projects:")
-                for p in projects:
-                    click.echo(f" - {p}")
-                return
-        elif project and not env:
-            envs = manager.list_envs(project)
-            if not envs:
-                click.echo(f"⚠️ No environments found for project {project}")
-                return
-            else:
-                click.echo(f"📁 Environments for project {project}:")
-                for e in envs:
-                    click.echo(f" - {e}")
-                return
-        elif project and env:
-            versions = manager.list_versions()
-            if not versions:
-                click.echo("⚠️ No versions found")
-                return
-            for v in versions:
-                if v["last_updated_by"] and v["last_updated_at"]:
-                    click.echo(f"📄 Version {v['version']}: updated by {v['last_updated_by']} at {v['last_updated_at']}")
-                else:
-                    click.echo(f"📄 Version {v['version']}: metadata missing")
-    except Exception as e:
-        click.echo(f"⚠️ {str(e)}")
+    cm = ConfigManager()
+    config = cm.load()
+
+    if repo_name and project and env:
+        repo_cfg = config['configs'].get(repo_name)
+        if not repo_cfg:
+            click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+            return
+        repo_path = repo_cfg['repo_path']
+        get_version_table(repo_path, repo_name, project, env)
+    elif repo_name and project:
+        repo_cfg = config['configs'].get(repo_name)
+        if not repo_cfg:
+            click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+            return
+        repo_path = repo_cfg['repo_path']
+        get_env_table(repo_path, repo_name, project)
+    elif repo_name:
+        repo_cfg = config['configs'].get(repo_name)
+        if not repo_cfg:
+            click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+            return
+        repo_path = repo_cfg['repo_path']
+        get_project_table(repo_path, repo_name)
+    else:
+        get_repo_table(config)
     
 
 @cli.command()
@@ -141,23 +110,57 @@ def list(project, env, repo_path):
 @click.option("--env", "--env-name", required=True)
 @click.option("--version", default="latest", help="Version to pull")
 @click.option("--out-path", default=".env", help="Where to save decrypted .env on machine")
-@click.option("--repo-path", default=DEFAULT_REPO_PATH)
-def pull(project, env, version, out_path, repo_path):
+@click.option("--repo-name", required=False, help="Name of the repo as in config")
+def pull(project, env, version, out_path, repo_name):
     """
-    Pull .env from git or a specific project and environment. \n
-    Usage: \n
-        gitenvy pull --project <PROJECT> --env <ENV> 
-            Pulls and decrypts the .env file for the specified project and environment. Default version is 'latest' and output path is './.env'.
-
-        gitenvy pull --project <PROJECT> --env <ENV> --version <VERSION> --out-path <PATH>
-            Optionally specify a version (default is 'latest') and output path (default is './.env').
+    Pull .env from git or a specific project and environment.
     """
-    manager = EnvManager(project, env, repo_path=repo_path)
+    cm = ConfigManager()
+    config = cm.load()
+    if repo_name:
+        repo_cfg = config['configs'].get(repo_name)
+        if not repo_cfg:
+            click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+            return
+    else:
+        default_name = config.get('default')
+    manager = EnvManager(project, env, repo_name=repo_name or default_name)
     try:
         file_path = manager.pull(version=version, out_path=out_path)
         click.echo(f"✅ Decrypted .env saved to {file_path}")
     except (FileNotFoundError, ValueError) as e:
         click.echo(f"⚠️ {str(e)}")
+
+@cli.command(name="set-default")
+@click.argument("repo_name")
+def set_default(repo_name):
+    cm = ConfigManager()
+    config = cm.load()
+    if repo_name not in config.get("configs", {}):
+        click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+        return
+    cm.set_default(repo_name)
+    click.echo(f"✅ Default repo set to '{repo_name}'")
+
+@cli.command(name="get-key")
+@click.argument("repo_name")
+def get_key(repo_name):
+    cm = ConfigManager()
+    config = cm.load()
+    repo_cfg = config['configs'].get(repo_name)
+    if not repo_cfg:
+        click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
+        return
+    key_path = os.path.expanduser(repo_cfg['key_path'])
+    if not os.path.exists(key_path):
+        click.echo(f"⚠️ Key file '{key_path}' does not exist.")
+        return
+    try:
+        with open(key_path, "r") as f:
+            key = f.read().strip()
+        click.echo(f"Key for repo '{repo_name}':\n{key}")
+    except Exception as e:
+        click.echo(f"⚠️ Failed to read key file: {e}")
 
 if __name__ == "__main__":
     cli()
