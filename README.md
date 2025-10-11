@@ -197,7 +197,7 @@ gitenvy set-default org1-env-store
 - [cryptography](https://cryptography.io/) for encryption
 
 ---
-```
+
 ## 📜 License
 
 This project is licensed under the [MIT License](./LICENSE).
