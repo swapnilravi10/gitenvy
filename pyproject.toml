@@ -1,15 +1,16 @@
 [tool.poetry]
 name = "gitenvy"
-version = "0.1.1"
+version = "1.2.3"
 description = "A library to manage encrypted .env files with Git as a single source of truth"
 authors = ["Swapnil Sawant <swapnil.ravi10@gmail.com>"]
 license = "MIT"
 homepage = "https://github.com/swapnilravi10/gitenvy"
 repository = "https://github.com/swapnilravi10/gitenvy"
 keywords = ["gitenv", "encryption", "git", "secrets", "gitenvy"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"
+python = ">=3.10,<4.0"
 click = "^8.1"
 pyyaml = "^6.0"
 cryptography = "^41.0"
