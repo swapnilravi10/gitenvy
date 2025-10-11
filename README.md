@@ -162,6 +162,55 @@ gitenvy set-key <REPO_NAME> <KEY>
 ```
 
 ---
+## 👥 Working with a Team
+
+When multiple teammates need to manage `.env` files securely in the same repo, `gitenvy` makes collaboration simple.
+
+---
+
+### 🧑‍💻 Team Member 1 — Initializes and Pushes
+
+1. **Initialize the repo**
+   ```bash
+   gitenvy init git@github.com:your-org/your-storage-repo.git
+   ```
+
+2. **Push a `.env` file**
+   ```bash
+   gitenvy push --project <PROJECT> --env <ENV>
+   ```
+
+3. **Get the encryption key**
+   ```bash
+   gitenvy get-key <REPO_NAME>
+   ```
+
+   Share this key **securely** with your teammates (e.g., using a secret manager or encrypted channel).  
+   ⚠️ **Never commit or share the key publicly.**
+
+---
+
+### 👩‍💻 Team Member 2 — Sets Up and Uses the Same Key
+
+1. **Initialize the same repo**
+   ```bash
+   gitenvy init git@github.com:your-org/your-storage-repo.git
+   ```
+
+2. **Set the Fernet key received from teammate**
+   ```bash
+   gitenvy set-key <REPO_NAME> <KEY>
+   ```
+
+3. **Start using it**
+   ```bash
+   gitenvy pull --project <PROJECT> --env <ENV>
+   gitenvy push --project <PROJECT> --env <ENV>
+   ```
+
+Now both teammates can **encrypt, push, and pull** environment files securely using the same shared key.
+
+---
 
 ## 🔄 Example Multi-Repo Workflow
 
