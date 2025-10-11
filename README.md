@@ -191,7 +191,7 @@ gitenvy set-default org1-env-store
 
 ## 🛠️ Tech Stack
 
-- Python 3.9+
+- Python 3.10+
 - [Click](https://click.palletsprojects.com/) for CLI
 - [GitPython](https://gitpython.readthedocs.io/) for Git operations
 - [cryptography](https://cryptography.io/) for encryption
