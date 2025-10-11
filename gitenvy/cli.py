@@ -24,7 +24,6 @@ def init(repo, path, branch):
     config_name = config_builder.extract_repo_name(repo)
     path = os.path.expanduser(os.path.join(path, config_name))
 
-    # Clone or pull the repo first
     result = EnvManager.init_repo(repo, path, branch)
     click.echo(result["message"])
 
@@ -47,7 +46,13 @@ def init(repo, path, branch):
 @click.option("--repo-name", required=False, help="Name of the repo as in config")
 def push(project, env, repo_name):
     """
-    Push .env file for a specific project and environment.
+    Push .env file for a specific project and environment. \n
+    Usage: \n
+        - gitenvy push --project <PROJECT> --env <ENV> \n
+        Encrypts and pushes the .env file to the specified project and environment.
+
+        - gitenvy push --project <PROJECT> --env <ENV> --repo-name <REPO_NAME> \n
+        Same as above, but specifies which repo config to use if multiple are configured.
     """
     cm = ConfigManager()
     config = cm.load()
@@ -139,8 +144,11 @@ def set_default(repo_name):
     if repo_name not in config.get("configs", {}):
         click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
         return
-    cm.set_default(repo_name)
-    click.echo(f"✅ Default repo set to '{repo_name}'")
+    try:
+        cm.set_default(repo_name)
+        click.echo(f"✅ Default repo set to '{repo_name}'")
+    except Exception as e:
+        click.echo(f"⚠️ Failed to set default: {e}")
 
 @cli.command(name="get-key")
 @click.argument("repo_name")
@@ -151,16 +159,34 @@ def get_key(repo_name):
     if not repo_cfg:
         click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
         return
-    key_path = os.path.expanduser(repo_cfg['key_path'])
-    if not os.path.exists(key_path):
-        click.echo(f"⚠️ Key file '{key_path}' does not exist.")
+    try:
+        key = cm.get_fernet_key(repo_name)
+        if key:
+            click.echo(f"'{repo_name}': {key}")
+        else:
+            click.echo(f"⚠️ Key file not found or unreadable for '{repo_name}'")
+    except (FileNotFoundError, ValueError) as e:
+        click.echo(f"⚠️ {str(e)}")
+    except Exception as e:
+        click.echo(f"⚠️ Failed to get key: {e}")
+
+@cli.command(name="set-key")
+@click.argument("repo_name")
+@click.argument("key")
+def set_key(repo_name, key):
+    cm = ConfigManager()
+    config = cm.load()
+    repo_cfg = config['configs'].get(repo_name)
+    if not repo_cfg:
+        click.echo(f"⚠️ Repo name '{repo_name}' not found in config.")
         return
     try:
-        with open(key_path, "r") as f:
-            key = f.read().strip()
-        click.echo(f"Key for repo '{repo_name}':\n{key}")
+        cm.set_fernet_key(repo_name, key)
+        click.echo(f"✅ Key updated for '{repo_name}'")
+    except (FileNotFoundError, ValueError) as e:
+        click.echo(f"⚠️ {str(e)}")
     except Exception as e:
-        click.echo(f"⚠️ Failed to read key file: {e}")
+        click.echo(f"⚠️ Failed to set key: {e}")
 
 if __name__ == "__main__":
     cli()

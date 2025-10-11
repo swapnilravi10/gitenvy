@@ -43,3 +43,31 @@ class ConfigManager:
         if not self._config:
             self.load()
         return self._config.get(key, default)
+    
+    def get_fernet_key(self, repo_name: str) -> Optional[str]:
+        if not self._config:
+            self.load()
+        repo_cfg = self._config.get("configs", {}).get(repo_name)
+        if not repo_cfg:
+            raise ValueError(f"Repo name '{repo_name}' not found in config.")
+        key_path = Path(repo_cfg.get("key_path", "")).expanduser()
+        if not key_path.exists():
+            raise FileNotFoundError(f"Key file '{key_path}' does not exist.")
+        try:
+            with open(key_path, "r") as f:
+                key = f.read().strip()
+                return key
+        except Exception:
+            return None
+        
+    def set_fernet_key(self, repo_name: str, key: str):
+        if not self._config:
+            self.load()
+        repo_cfg = self._config.get("configs", {}).get(repo_name)
+        if not repo_cfg:
+            raise ValueError(f"Repo name '{repo_name}' not found in config.")
+        key_path = Path(repo_cfg.get("key_path", "")).expanduser()
+        key_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(key_path, "w") as f:
+            f.write(key.strip())
+        key_path.chmod(0o600)
