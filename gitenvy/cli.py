@@ -80,7 +80,7 @@ def push(project, env, repo_name):
     manager = EnvManager(project, env, repo_name=repo_name or default_name)
     try:
         out_file = manager.push()
-        click.echo(f"Encrypted .env file stored at: {out_file}")
+        click.echo(f"Encrypted .env file stored at: {project}/{env}")
     except FileNotFoundError as e:
         click.echo(str(e))
     except PermissionError as e:
