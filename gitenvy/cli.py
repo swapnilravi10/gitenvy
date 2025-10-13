@@ -80,9 +80,15 @@ def push(project, env, repo_name):
     manager = EnvManager(project, env, repo_name=repo_name or default_name)
     try:
         out_file = manager.push()
-        click.echo(f"Encrypted .env file stored at: {out_file}")
+        click.echo(f"Encrypted .env file stored at: {project}/{env}")
     except FileNotFoundError as e:
         click.echo(str(e))
+    except PermissionError as e:
+        click.echo(f"🚫 Permission error: {e}")
+    except RuntimeError as e:
+        click.echo(f"❌ Git/Sync/Decryption error: {e}")
+    except Exception as e:
+        click.echo(f"💥 Unexpected error: {type(e).__name__}: {e}")
 
 @cli.command(name="list")
 @click.option("--repo-name", required=False, help="Name of the repo as in config")
@@ -173,6 +179,12 @@ def pull(project, env, version, out_path, repo_name):
         click.echo(f"✅ Decrypted .env saved to {file_path}")
     except (FileNotFoundError, ValueError) as e:
         click.echo(f"⚠️ {str(e)}")
+    except PermissionError as e:
+        click.echo(f"🚫 Permission error: {e}")
+    except RuntimeError as e:
+        click.echo(f"❌ Git/Sync/Decryption error: {e}")
+    except Exception as e:
+        click.echo(f"💥 Unexpected error: {type(e).__name__}: {e}")
 
 @cli.command(name="set-default")
 @click.argument("repo_name")
@@ -194,6 +206,10 @@ def set_default(repo_name):
         click.echo(f"✅ Default repo set to '{repo_name}'")
     except Exception as e:
         click.echo(f"⚠️ Failed to set default: {e}")
+    except PermissionError as e:
+        click.echo(f"🚫 Permission error: {e}")
+    except RuntimeError as e:
+        click.echo(f"❌ Git/Sync/Decryption error: {e}")
 
 @cli.command(name="get-key")
 @click.argument("repo_name")
@@ -220,6 +236,10 @@ def get_key(repo_name):
         click.echo(f"⚠️ {str(e)}")
     except Exception as e:
         click.echo(f"⚠️ Failed to get key: {e}")
+    except PermissionError as e:
+        click.echo(f"🚫 Permission error: {e}")
+    except RuntimeError as e:
+        click.echo(f"❌ Git/Sync/Decryption error: {e}")
 
 @cli.command(name="set-key")
 @click.argument("repo_name")
@@ -244,6 +264,10 @@ def set_key(repo_name, key):
         click.echo(f"⚠️ {str(e)}")
     except Exception as e:
         click.echo(f"⚠️ Failed to set key: {e}")
+    except PermissionError as e:
+        click.echo(f"🚫 Permission error: {e}")
+    except RuntimeError as e:
+        click.echo(f"❌ Git/Sync/Decryption error: {e}")
 
 if __name__ == "__main__":
     cli()
