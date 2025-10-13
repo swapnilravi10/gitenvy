@@ -1,9 +1,22 @@
 import click
 import os
 from pathlib import Path
+from git import GitCommandError, Repo
 import json
 
+
+def _sync_repo(repo):
+    """Syncs the given git.Repo object."""
+
+    try:
+        repo = Repo(str(repo))
+        repo.remotes.origin.fetch()
+        repo.remotes.origin.pull()
+    except GitCommandError as e:
+        raise RuntimeError(f"⚠️ Could not pull latest changes: {e}")
+
 def get_repo_table(config):
+    click.echo("Fetching configured repos...")
     repo_names = list(config.get("configs", {}).keys())
     default_repo = config.get("default")
     if not repo_names:
@@ -16,6 +29,8 @@ def get_repo_table(config):
         click.echo(f"{name:<30} {is_default:<10}")
 
 def get_project_table(repo_path, repo_name):
+    click.echo(f"Fetching projects for repo '{repo_name}'...")
+    _sync_repo(repo_path)
     repo_path_obj = Path(os.path.expanduser(repo_path))
     if not repo_path_obj.exists():
         click.echo(f"⚠️ Repo path '{repo_path}' does not exist.")
@@ -30,6 +45,8 @@ def get_project_table(repo_path, repo_name):
         click.echo(f"{proj:<30}")
 
 def get_env_table(repo_path, repo_name, project):
+    click.echo(f"Fetching environments for project '{project}' in repo '{repo_name}'...")
+    _sync_repo(repo_path)
     project_path = Path(os.path.expanduser(repo_path)) / project
     if not project_path.exists():
         click.echo(f"⚠️ Project '{project}' not found in repo '{repo_name}'.")
@@ -44,11 +61,12 @@ def get_env_table(repo_path, repo_name, project):
         click.echo(f"{env:<30}")
 
 def get_version_table(repo_path, repo_name, project, env_name):
+    click.echo(f"Fetching versions for environment '{env_name}' in project '{project}' of repo '{repo_name}'...")
+    _sync_repo(repo_path)
     env_path = Path(os.path.expanduser(repo_path)) / project / env_name
     if not env_path.exists():
         click.echo(f"⚠️ Environment '{env_name}' not found in project '{project}' of repo '{repo_name}'.")
         return
-
     version_dirs = [p for p in env_path.iterdir() if p.is_dir() and p.name.isdigit()]
     if not version_dirs:
         click.echo(f"⚠️ No versions found in environment '{env_name}' of project '{project}'.")

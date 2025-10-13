@@ -1,4 +1,5 @@
 from pathlib import Path
+import click
 from git import Repo, GitCommandError
 from .crypto import CryptoManager
 from .config_manager import ConfigManager
@@ -48,6 +49,7 @@ class EnvManager:
         Clone the repo if not exists, or pull and switch branch if exists.
         Returns: dict with 'success' (bool) and 'message' (str)
         """
+        click.echo(f"Initializing repo from {repo_url}...")
         git_dir = os.path.join(path, ".git")
         if not os.path.exists(path):
             clone_cmd = ["git", "clone"]
@@ -99,7 +101,7 @@ class EnvManager:
         env_file_path = Path(env_file)
         if not env_file_path.exists():
             raise FileNotFoundError(f".env file not found: {env_file_path}")
-
+        click.echo(f"Pushing encrypted .env for {self.project}/{self.env_name}...")
         try:
             self.repo.remotes.origin.fetch()
             self.repo.remotes.origin.pull(rebase=True)
@@ -151,12 +153,12 @@ class EnvManager:
 
         return out_file
 
-    
     def pull(self, version: str = "latest", out_path: str = ".env"):
         """
         Pull the latest version of .env from git, decrypt, and save locally.
         Always fetches remote first.
         """
+        click.echo(f"Pulling version '{version}' of {self.project}/{self.env_name}...")
         try:
             self.repo.remotes.origin.fetch()
             self.repo.remotes.origin.pull()
@@ -192,74 +194,3 @@ class EnvManager:
             raise PermissionError(f"No write permission for {out_file}")
 
         return out_file
-
-    
-    def list_projects(self):
-        """List all projects in the repo (excluding .git)"""
-        try:
-            self.repo.remotes.origin.fetch()
-            self.repo.remotes.origin.pull()
-        except GitCommandError as e:
-            raise RuntimeError(f"⚠️ Warning: could not pull latest changes: {e}")
-        if not self.repo_path.exists():
-            return []
-        return [p.name for p in self.repo_path.iterdir() if p.is_dir() and p.name != ".git"]
-
-    def list_envs(self, project: str):
-        """List all environments for a given project"""
-        try:
-            self.repo.remotes.origin.fetch()
-            self.repo.remotes.origin.pull()
-        except GitCommandError as e:
-            raise RuntimeError(f"⚠️ Warning: could not pull latest changes: {e}")
-        project_dir = self.repo_path / project
-        if not project_dir.exists():
-            return []
-        return [p.name for p in project_dir.iterdir() if p.is_dir()]
-
-    def list_versions(self, version: str = None):
-        """List all versions (with metadata) or details of a specific version"""
-        try:
-            self.repo.remotes.origin.fetch()
-            self.repo.remotes.origin.pull()
-        except GitCommandError as e:
-            raise RuntimeError(f"⚠️ Warning: could not pull latest changes: {e}")
-        base_dir = self.repo_path / self.project / self.env_name
-        if not base_dir.exists():
-            return []
-
-        versions = sorted(
-            [p for p in base_dir.iterdir() if p.is_dir() and p.name.isdigit()],
-            key=lambda p: int(p.name)
-        )
-
-        if not versions:
-            return []
-
-        # Handle "latest" alias or explicit version
-        if version:
-            if version.lower() == "latest":
-                version = versions[-1].name
-            elif version not in [p.name for p in versions]:
-                return []
-            versions = [base_dir / version]
-
-        results = []
-        for v in versions:
-            meta_file = v / "metadata.json"
-            if meta_file.exists():
-                with meta_file.open() as f:
-                    meta = json.load(f)
-                results.append({
-                    "version": v.name,
-                    "last_updated_by": meta.get("last_updated_by", "unknown"),
-                    "last_updated_at": meta.get("last_updated_at", "unknown"),
-                })
-            else:
-                results.append({
-                    "version": v.name,
-                    "last_updated_by": None,
-                    "last_updated_at": None,
-                })
-
-        return results
