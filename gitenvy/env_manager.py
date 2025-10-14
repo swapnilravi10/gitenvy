@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 import os
 import subprocess
+import shutil
 
 class EnvManager:
     def __init__(self, project: str, env_name: str, repo_name:str):
@@ -96,12 +97,14 @@ class EnvManager:
     def push(self, env_file: str = ".env"):
         """
         Encrypt and push the .env file to the git repo.
-        Always syncs with remote first.
+        Always syncs with remote first. Performs rollback on failure.
         """
         env_file_path = Path(env_file)
         if not env_file_path.exists():
             raise FileNotFoundError(f".env file not found: {env_file_path}")
+
         click.echo(f"Pushing encrypted .env for {self.project}/{self.env_name}...")
+
         try:
             self.repo.remotes.origin.fetch()
             self.repo.remotes.origin.pull(rebase=True)
@@ -124,12 +127,11 @@ class EnvManager:
 
         out_dir = base_dir / next_version
         try:
-            out_dir.mkdir(parents=True, exist_ok=False)
+            out_dir.mkdir(parents=False)
         except FileExistsError:
-            # Handle race condition
             next_version = str(max(existing_versions + [int(next_version)], default=0) + 1)
             out_dir = base_dir / next_version
-            out_dir.mkdir(parents=True, exist_ok=True)
+            out_dir.mkdir(parents=True)
 
         out_file = out_dir / ".env.enc"
         try:
@@ -149,9 +151,22 @@ class EnvManager:
             self.repo.index.commit(f"Add {self.project}/{self.env_name} version {next_version}")
             self.repo.remotes.origin.push()
         except GitCommandError as e:
-            raise RuntimeError(f"⚠️ Git push failed: {e}")
+            click.echo(f"⚠️ Git push failed: {e}")
+            click.echo("Rolling back local changes...")
+
+            # Only reset last commit if it was created by gitenvy
+            last_commit = self.repo.head.commit.message
+            if last_commit.startswith("Add") and f"{self.project}/{self.env_name}" in last_commit:
+                try:
+                    self.repo.git.reset("--hard", "HEAD~1")
+                except Exception:
+                    pass
+                shutil.rmtree(out_dir, ignore_errors=True)
+
+            raise RuntimeError(f"Push failed and local changes were rolled back.")
 
         return out_file
+
 
     def pull(self, version: str = "latest", out_path: str = ".env"):
         """
