@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import shutil
+from tempfile import NamedTemporaryFile
 
 class EnvManager:
     def __init__(self, project: str, env_name: str, repo_name:str):
@@ -170,15 +171,16 @@ class EnvManager:
 
     def pull(self, version: str = "latest", out_path: str = ".env"):
         """
-        Pull the latest version of .env from git, decrypt, and save locally.
-        Always fetches remote first.
+        Pull the latest (or specified) version of .env from git, decrypt, and save locally.
+        Always fetches remote first and writes atomically to avoid corrupting existing files.
         """
         click.echo(f"Pulling version '{version}' of {self.project}/{self.env_name}...")
+        
         try:
             self.repo.remotes.origin.fetch()
             self.repo.remotes.origin.pull()
         except GitCommandError as e:
-            raise RuntimeError(f"⚠️ Warning: could not pull latest changes: {e}")
+            raise RuntimeError(f"⚠️ Could not pull latest changes: {e}")
 
         base_dir = self.repo_path / self.project / self.env_name
         if not base_dir.exists():
@@ -204,8 +206,12 @@ class EnvManager:
 
         out_file = Path(out_path)
         try:
-            out_file.write_text(decrypted)
+            with NamedTemporaryFile("w", delete=False, dir=out_file.parent) as tmp:
+                tmp.write(decrypted)
+                tmp_path = Path(tmp.name)
+            shutil.move(str(tmp_path), out_file)
         except PermissionError:
             raise PermissionError(f"No write permission for {out_file}")
-
+        except Exception as e:
+            raise RuntimeError(f"Failed to save decrypted .env: {e}")
         return out_file
